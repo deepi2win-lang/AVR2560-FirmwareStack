@@ -34,6 +34,8 @@ typedef struct { uint16_t pin_address; uint16_t ddr_address; uint16_t port_addre
 #define OCR0B_ADDR  0x48
 #define TIMSK0_ADDR 0x6E
 #define TIFR0_ADDR  0x35
+#define TIFR1_ADDR  0x36
+#define TIFR2_ADDR  0x37
 #define TCCR1A_ADDR 0x80
 #define TCCR1B_ADDR 0x81
 #define TCCR1C_ADDR 0x82
@@ -47,6 +49,9 @@ typedef struct { uint16_t pin_address; uint16_t ddr_address; uint16_t port_addre
 #define OCR2A_ADDR 0xB3
 #define OCR2B_ADDR 0xB4
 #define TIMSK2_ADDR 0x70
+
+/* Status register */
+#define SREG_ADDR   0x5F
 
 /* ADC */
 #define ADMUX_ADDR 0x7C
@@ -75,7 +80,9 @@ typedef struct { uint16_t pin_address; uint16_t ddr_address; uint16_t port_addre
 #define TIMER2 2
 #define PRESCALER_1    1
 #define PRESCALER_8    8
+#define PRESCALER_32   32    /* Timer2 only */
 #define PRESCALER_64   64
+#define PRESCALER_128  128   /* Timer2 only */
 #define PRESCALER_256  256
 #define PRESCALER_1024 1024
 #define PWM_CHANNEL_A  0
