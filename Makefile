@@ -1,9 +1,9 @@
 MCU=atmega2560
 CC=avr-gcc
 OBJCOPY=avr-objcopy
-CFLAGS=-mmcu=$(MCU) -Os -Wall -Iinc
+CFLAGS=-mmcu=$(MCU) -Os -Wall -Iinclude
 SRC=$(wildcard src/*.c)
-APP=examples/main_led.c
+APP?=main.c
 ELF=main.elf
 HEX=main.hex
 all:

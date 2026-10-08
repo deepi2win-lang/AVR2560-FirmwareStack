@@ -20,21 +20,27 @@ static const uint8_t cc[10] =
 
 static uint8_t digit_pattern(uint8_t digit)
 {
-    uint8_t value;
-
-    value = cc[digit];
-
     if (digit > 9)
     {
         return 0x00;
     }
 
-    if (digit == 0)
-    {
-        value = cc[0];
-    }
+    return cc[digit];
+}
 
-    return value;
+
+/* Set or clear only the digit-enable pins, leaving the rest of the port alone */
+static void digits_write(SevenSegment_Config *s, uint8_t mask)
+{
+    uint8_t all = s->tens_mask | s->units_mask;
+
+    for (uint8_t b = 0; b < 8; b++)
+    {
+        if (all & (1U << b))
+        {
+            gpio_pinWrite(s->digit_port, b, (mask >> b) & 1U);
+        }
+    }
 }
 
 
@@ -44,10 +50,16 @@ void seven_segment_init(SevenSegment_Config *s)
     gpio_portMode(s->segment_port, 0xFF);
 
     /* Digit control lines are outputs */
-    gpio_portMode(
-        s->digit_port,
-        s->tens_mask | s->units_mask
-    );
+    for (uint8_t b = 0; b < 8; b++)
+    {
+        if ((s->tens_mask | s->units_mask) & (1U << b))
+        {
+            gpio_pinMode(s->digit_port, b, OUTPUT);
+        }
+    }
+
+    s->number = 0;
+    s->digit = 0;
 
     seven_segment_off(s);
 }
@@ -57,10 +69,7 @@ void seven_segment_off(SevenSegment_Config *s)
 {
     /* Turn both digits OFF */
 
-    gpio_portWrite(
-        s->digit_port,
-        0x00
-    );
+    digits_write(s, 0x00);
 
     /* Turn all segments OFF */
 
@@ -85,12 +94,6 @@ void seven_segment_display(
         return;
     }
 
-    uint8_t tens;
-    uint8_t units;
-
-    tens = number / 10;
-    units = number % 10;
-
     /*
      * Store the number.
      *
@@ -98,31 +101,24 @@ void seven_segment_display(
      * seven_segment_refresh().
      */
 
-    (void)tens;
-    (void)units;
+    s->number = number;
 }
 
 
 void seven_segment_refresh(SevenSegment_Config *s)
 {
-    static uint8_t number = 0;
-    static uint8_t digit = 0;
-
     uint8_t tens;
     uint8_t units;
     uint8_t pattern;
 
-    tens = number / 10;
-    units = number % 10;
+    tens = s->number / 10;
+    units = s->number % 10;
 
     /* Turn both digits OFF before changing segments */
 
-    gpio_portWrite(
-        s->digit_port,
-        0x00
-    );
+    digits_write(s, 0x00);
 
-    if (digit == 0)
+    if (s->digit == 0)
     {
         /* Tens digit */
 
@@ -138,12 +134,9 @@ void seven_segment_refresh(SevenSegment_Config *s)
             pattern
         );
 
-        gpio_portWrite(
-            s->digit_port,
-            s->tens_mask
-        );
+        digits_write(s, s->tens_mask);
 
-        digit = 1;
+        s->digit = 1;
     }
     else
     {
@@ -161,11 +154,8 @@ void seven_segment_refresh(SevenSegment_Config *s)
             pattern
         );
 
-        gpio_portWrite(
-            s->digit_port,
-            s->units_mask
-        );
+        digits_write(s, s->units_mask);
 
-        digit = 0;
+        s->digit = 0;
     }
 }
