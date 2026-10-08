@@ -1,31 +1,8 @@
 #include "gpio.h"
-
-
-void gpio_portMode(GPIO_Port port, uint8_t mode)
-{
-    volatile uint8_t *ddr;
-
-    ddr = (volatile uint8_t *)port.ddr_address;
-
-    *ddr = mode;
-}
-
-
-void gpio_portWrite(GPIO_Port port, uint8_t value)
-{
-    volatile uint8_t *port_reg;
-
-    port_reg = (volatile uint8_t *)port.port_address;
-
-    *port_reg = value;
-}
-
-
-uint8_t gpio_portRead(GPIO_Port port)
-{
-    volatile uint8_t *pin;
-
-    pin = (volatile uint8_t *)port.pin_address;
-
-    return *pin;
-}
+void gpio_portMode(GPIO_Port p,uint8_t m){volatile uint8_t*r=(volatile uint8_t*)p.ddr_address;*r=m;}
+void gpio_portWrite(GPIO_Port p,uint8_t v){volatile uint8_t*r=(volatile uint8_t*)p.port_address;*r=v;}
+uint8_t gpio_portRead(GPIO_Port p){volatile uint8_t*r=(volatile uint8_t*)p.pin_address;return *r;}
+void gpio_pinMode(GPIO_Port p,uint8_t b,uint8_t m){volatile uint8_t*r=(volatile uint8_t*)p.ddr_address;if(m)*r|=(uint8_t)(1U<<b);else *r&=(uint8_t)~(1U<<b);}
+void gpio_pinWrite(GPIO_Port p,uint8_t b,uint8_t v){volatile uint8_t*r=(volatile uint8_t*)p.port_address;if(v)*r|=(uint8_t)(1U<<b);else *r&=(uint8_t)~(1U<<b);}
+uint8_t gpio_pinRead(GPIO_Port p,uint8_t b){volatile uint8_t*r=(volatile uint8_t*)p.pin_address;return (uint8_t)((*r>>b)&1U);}
+void gpio_pinToggle(GPIO_Port p,uint8_t b){volatile uint8_t*r=(volatile uint8_t*)p.port_address;*r^=(uint8_t)(1U<<b);}
