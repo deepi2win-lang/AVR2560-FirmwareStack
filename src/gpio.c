@@ -1,5 +1,10 @@
 #include "gpio.h"
 
+/* Disable interrupts around a read-modify-write, restore afterwards */
+#define ATOMIC_BEGIN()  uint8_t sreg = *(volatile uint8_t *)SREG_ADDR; \
+                        __asm__ __volatile__("cli" ::: "memory")
+#define ATOMIC_END()    (*(volatile uint8_t *)SREG_ADDR = sreg)
+
 void gpio_portMode(GPIO_Port p, uint8_t m)
 {
     volatile uint8_t *reg = (volatile uint8_t *)p.ddr_address;
@@ -39,6 +44,13 @@ void gpio_pinMode(GPIO_Port p, uint8_t b, uint8_t m)
 {
     volatile uint8_t *reg = (volatile uint8_t *)p.ddr_address;
 
+    if (b > 7)
+    {
+        return;
+    }
+
+    ATOMIC_BEGIN();
+
     if (m)
     {
         *reg |= (uint8_t)(1U << b);
@@ -47,6 +59,8 @@ void gpio_pinMode(GPIO_Port p, uint8_t b, uint8_t m)
     {
         *reg &= (uint8_t)~(1U << b);
     }
+
+    ATOMIC_END();
 }
 
 /**
@@ -60,6 +74,13 @@ void gpio_pinWrite(GPIO_Port p, uint8_t b, uint8_t v)
 {
     volatile uint8_t *reg = (volatile uint8_t *)p.port_address;
 
+    if (b > 7)
+    {
+        return;
+    }
+
+    ATOMIC_BEGIN();
+
     if (v)
     {
         *reg |= (uint8_t)(1U << b);
@@ -68,6 +89,8 @@ void gpio_pinWrite(GPIO_Port p, uint8_t b, uint8_t v)
     {
         *reg &= (uint8_t)~(1U << b);
     }
+
+    ATOMIC_END();
 }
 
 /**
@@ -80,6 +103,11 @@ void gpio_pinWrite(GPIO_Port p, uint8_t b, uint8_t v)
 uint8_t gpio_pinRead(GPIO_Port p, uint8_t b)
 {
     volatile uint8_t *reg = (volatile uint8_t *)p.pin_address;
+
+    if (b > 7)
+    {
+        return 0;
+    }
 
     return (uint8_t)((*reg >> b) & 1U);
 }
@@ -94,5 +122,14 @@ void gpio_pinToggle(GPIO_Port p, uint8_t b)
 {
     volatile uint8_t *reg = (volatile uint8_t *)p.port_address;
 
+    if (b > 7)
+    {
+        return;
+    }
+
+    ATOMIC_BEGIN();
+
     *reg ^= (uint8_t)(1U << b);
+
+    ATOMIC_END();
 }
