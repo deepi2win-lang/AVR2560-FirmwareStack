@@ -1,21 +1,32 @@
 #include "gpio.h"
 #include "led.h"
-#include "delay.h"
+#include "keypad.h"
+#include "timer.h"
 
 int main(void)
 {
-    /* Configure PORTF as output */
-    gpio_portMode(GPIO_PORTF, 0xFF);
+    uint8_t key;
 
-    /* Initialize LED on PF0 */
+    /* LED on PF0 */
+    gpio_portMode(GPIO_PORTF, 0x01);
+
     led_init(GPIO_PORTF, 0x01);
+
+    keypad_init();
+
+    timer1_init();
 
     while (1)
     {
-        led_on();
-        delay_s(1);
+        key = keypad_getKey();
 
-        led_off();
-        delay_s(1);
+        if (key != 0)
+        {
+            led_on();
+
+            timer1_delay_ms(1000);
+
+            led_off();
+        }
     }
 }
