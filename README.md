@@ -57,6 +57,7 @@ Responsible for the development and implementation of the **Timer driver**, incl
 - Timer operating modes
 - Timer control
 - Timing functionality
+- Timer interuupt handling
 - Timer testing and validation
 
 GitHub: [github.com/deepi2win-lang](https://github.com/deepi2win-lang)
@@ -325,6 +326,7 @@ Planned modules include:
 - Servo motor
 - DC motor control
 - Communication interfaces
+  
 
 The long-term goal is to develop a complete **reusable bare-metal firmware stack for the ATmega2560**.
 
