@@ -1,6 +1,0 @@
-#include "gpio.h"
-int main(void){ gpio_portMode(GPIO_PORTF,0xFF); gpio_portWrite(GPIO_PORTF,0xFF); while(1){} }
-
-
-#include "led.h"
-int main(void){ LED_Config led={GPIO_PORTF,0,HIGH}; led_init(&led); led_on(&led); while(1){} }
